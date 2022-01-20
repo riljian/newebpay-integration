@@ -221,7 +221,7 @@ const CreateOrder: NextPage<{ mpgGateway: string }> = ({ mpgGateway }) => {
     []
   )
   return (
-    <Container sx={{ py: 1 }}>
+    <Container sx={{ py: 2 }}>
       <LocalizationProvider dateAdapter={DateAdapter}>
         <Formik
           validationSchema={validationSchema}
