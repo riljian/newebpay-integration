@@ -4,7 +4,7 @@ import { Box, Button, Container, Grid, Stack } from '@mui/material'
 import axios from 'axios'
 import { addDays, format } from 'date-fns'
 import { Field, Form, Formik } from 'formik'
-import { GetStaticProps, NextPage } from 'next'
+import { GetServerSideProps, NextPage } from 'next'
 import { useMemo, useState } from 'react'
 import * as yup from 'yup'
 import FormikCheckboxField from '../../components/formik/Checkbox'
@@ -182,10 +182,10 @@ const transformValuesToPayload = (values: Values) =>
     }
     return { ...acc, [mappedKey || name]: formattedValue }
   }, {})
-const formPostNewebpay = (payload: any) => {
+const formPostNewebpay = (mpgGateway: string, payload: any) => {
   const form = document.createElement('form')
   form.setAttribute('method', 'POST')
-  form.setAttribute('action', process.env.NEXT_PUBLIC_NEWEBPAY_MPG_GATEWAY!)
+  form.setAttribute('action', mpgGateway)
   Object.entries(payload).forEach(([key, value]) => {
     const input = document.createElement('input')
     input.setAttribute('type', 'hidden')
@@ -197,7 +197,7 @@ const formPostNewebpay = (payload: any) => {
   form.submit()
 }
 
-const CreateOrder: NextPage = () => {
+const CreateOrder: NextPage<{ mpgGateway: string }> = ({ mpgGateway }) => {
   const [{ newebpayForm }, setState] = useState<State>(() => ({
     newebpayForm: null,
   }))
@@ -361,7 +361,7 @@ const CreateOrder: NextPage = () => {
                       variant="contained"
                       onClick={() => {
                         const { tradeInfoRaw, ...payload } = newebpayForm
-                        formPostNewebpay(payload)
+                        formPostNewebpay(mpgGateway, payload)
                       }}
                     >
                       前往付款
@@ -377,9 +377,10 @@ const CreateOrder: NextPage = () => {
   )
 }
 
-export const getStaticProps: GetStaticProps = async () => ({
+export const getServerSideProps: GetServerSideProps = async () => ({
   props: {
     title: 'Create an order',
+    mpgGateway: process.env.MPG_GATEWAY,
   },
 })
 

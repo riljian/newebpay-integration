@@ -13,32 +13,13 @@ const OrderResult: NextPage<{ title: string }> = ({ title, ...restProps }) => {
 }
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  const qs = require('qs')
-  const crypto = require('crypto')
-  const data = await new Promise((resolve) => {
-    const { req } = ctx
-    let body = ''
-    req.on('data', (chunk) => {
-      body += chunk
-    })
-    req.on('end', () => {
-      resolve(body)
-    })
-  })
-  const { Status, TradeInfo } = qs.parse(data as string)
-  const decipher = crypto.createDecipheriv(
-    'aes-256-cbc',
-    process.env.HASH_KEY,
-    process.env.HASH_IV
-  )
-  // FIXME: failed to decrypt when Status != 'SUCCESS'
-  let decrypted = decipher.update(TradeInfo, 'hex', 'utf8')
-  decrypted += decipher.final('utf8')
+  const { extractStatusAndTradeInfo } = await import('../../interal/helpers')
+  const { status, tradeInfo } = await extractStatusAndTradeInfo(ctx.req)
   return {
     props: {
+      status,
+      tradeInfo,
       title: 'Order result',
-      status: Status,
-      tradeInfo: JSON.parse(decrypted),
     },
   }
 }
