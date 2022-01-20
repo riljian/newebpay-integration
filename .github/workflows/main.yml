@@ -8,7 +8,6 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
-    environment: main
     permissions:
       contents: read
       id-token: write
@@ -35,6 +34,7 @@ jobs:
       contents: read
       id-token: write
     steps:
+      - uses: actions/checkout@v2
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v0
         with:
