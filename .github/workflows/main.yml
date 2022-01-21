@@ -43,7 +43,7 @@ jobs:
       - name: Deploy to Cloud Run
         uses: google-github-actions/deploy-cloudrun@v0
         with:
-          service: newebpay-integration
+          service: ${{ secrets.CLOUD_RUN_SERVICE_ID }}
           image: ${{ secrets.IMAGE_NAME }}:${{ github.sha }}
           region: ${{ secrets.CLOUD_RUN_REGION }}
     needs:
