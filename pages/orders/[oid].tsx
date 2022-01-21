@@ -3,6 +3,7 @@ import axios from 'axios'
 import { GetServerSideProps, NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
+import Loading from '../../components/Loading'
 
 const OrderResult: NextPage = () => {
   const {
@@ -22,7 +23,7 @@ const OrderResult: NextPage = () => {
   }, [oid])
 
   if (order === null) {
-    return null
+    return <Loading />
   }
 
   return (

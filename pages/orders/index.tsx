@@ -12,6 +12,7 @@ import axios from 'axios'
 import { GetServerSideProps, NextPage } from 'next'
 import { useEffect, useState } from 'react'
 import Link from '../../components/Link'
+import Loading from '../../components/Loading'
 import { ORDERS_MANAGE_PATH } from '../../configs/path'
 import { formPost } from '../../helpers'
 import Order, { OrderPaymentType, OrderStatus } from '../../models/Order'
@@ -107,6 +108,10 @@ const Orders: NextPage<{ mpgGateway: string }> = ({ mpgGateway }) => {
         console.error(error)
       })
   }, [])
+
+  if (orders.length === 0) {
+    return <Loading />
+  }
 
   return (
     <TableContainer>
