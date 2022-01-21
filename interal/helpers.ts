@@ -2,6 +2,12 @@ import crypto from 'crypto'
 import { GetServerSidePropsContext } from 'next'
 import { newebpayEncryptionPair } from './config'
 
+export const encryptTradeInfoByAES = (tradeInfoRaw: string) => {
+  const { key, iv } = newebpayEncryptionPair
+  const cipher = crypto.createCipheriv('aes-256-cbc', key, iv)
+  const encrypted = cipher.update(tradeInfoRaw, 'utf8', 'hex')
+  return encrypted + cipher.final('hex')
+}
 export const hashEncryptedTradeInfoBySHA256 = (value: string) => {
   const { key, iv } = newebpayEncryptionPair
   const input = `HashKey=${key}&${value}&HashIV=${iv}`

@@ -13,6 +13,7 @@ import FormikSelectField from '../../components/formik/Select'
 import FormikTextField from '../../components/formik/TextField'
 import { SupportedLanguage } from '../../configs/newebpay'
 import { ORDERS_RESULT_PATH, ORDERS_TICKET_PATH } from '../../configs/path'
+import { formPost } from '../../helpers'
 
 type FieldName =
   | 'language'
@@ -182,20 +183,6 @@ const transformValuesToPayload = (values: Values) =>
     }
     return { ...acc, [mappedKey || name]: formattedValue }
   }, {})
-const formPostNewebpay = (mpgGateway: string, payload: any) => {
-  const form = document.createElement('form')
-  form.setAttribute('method', 'POST')
-  form.setAttribute('action', mpgGateway)
-  Object.entries(payload).forEach(([key, value]) => {
-    const input = document.createElement('input')
-    input.setAttribute('type', 'hidden')
-    input.setAttribute('name', key)
-    input.setAttribute('value', value as string)
-    form.append(input)
-  })
-  document.body.appendChild(form)
-  form.submit()
-}
 
 const CreateOrder: NextPage<{ mpgGateway: string }> = ({ mpgGateway }) => {
   const [{ newebpayForm }, setState] = useState<State>(() => ({
@@ -361,7 +348,7 @@ const CreateOrder: NextPage<{ mpgGateway: string }> = ({ mpgGateway }) => {
                       variant="contained"
                       onClick={() => {
                         const { tradeInfoRaw, ...payload } = newebpayForm
-                        formPostNewebpay(mpgGateway, payload)
+                        formPost(mpgGateway, payload)
                       }}
                     >
                       前往付款
