@@ -11,6 +11,8 @@ import {
 import axios from 'axios'
 import { GetServerSideProps, NextPage } from 'next'
 import { useEffect, useState } from 'react'
+import Link from '../../components/Link'
+import { ORDERS_MANAGE_PATH } from '../../configs/path'
 import { formPost } from '../../helpers'
 import Order, { OrderPaymentType, OrderStatus } from '../../models/Order'
 
@@ -23,6 +25,9 @@ const columns: Column<Order>[] = [
   {
     label: '訂單編號',
     key: 'id',
+    formatter: (value) => (
+      <Link href={`${ORDERS_MANAGE_PATH}/${value}`}>{value}</Link>
+    ),
   },
   {
     label: '狀態',

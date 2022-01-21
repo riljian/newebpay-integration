@@ -17,6 +17,41 @@ export const hashEncryptedTradeInfoBySHA256 = (value: string) => {
     .digest('hex')
     .toUpperCase()
 }
+export const getCheckValue = (
+  amount: string,
+  merchantId: string,
+  orderId: string
+) => {
+  const { key, iv } = newebpayEncryptionPair
+  const input = `IV=${iv}&Amt=${amount}&MerchantID=${merchantId}&MerchantOrderNo=${orderId}&Key=${key}`
+  return crypto
+    .createHash('sha256')
+    .update(input, 'utf8')
+    .digest('hex')
+    .toUpperCase()
+}
+export const extractTradeInfoResponse = (data: any): any => {
+  const { Status, Result } = data
+
+  if (Status !== 'SUCCESS') {
+    throw new Error(Status)
+  }
+
+  const { Amt, MerchantID, MerchantOrderNo, TradeNo, CheckCode } = Result
+  const { key, iv } = newebpayEncryptionPair
+  const input = `HashIV=${iv}&Amt=${Amt}&MerchantID=${MerchantID}&MerchantOrderNo=${MerchantOrderNo}&TradeNo=${TradeNo}&HashKey=${key}`
+  const expected = crypto
+    .createHash('sha256')
+    .update(input, 'utf8')
+    .digest('hex')
+    .toUpperCase()
+
+  if (expected !== CheckCode) {
+    throw new Error('Invalid response payload')
+  }
+
+  return Result
+}
 export const decryptTradeInfo = (value: string) => {
   const crypto = require('crypto')
   const decipher = crypto.createDecipheriv(
