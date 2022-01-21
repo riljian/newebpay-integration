@@ -27,7 +27,7 @@ const encryptTradeInfoByAES = (tradeInfoRaw: string) => {
 const handler: NextApiHandler = async (req, res) => {
   if (req.method === 'POST') {
     const data = req.body
-    const doc = await db.collection('newebpay-integration/orders').add({
+    const doc = await db.collection('newebpay-integration-orders').add({
       status: OrderStatus.Pending,
       customizedData: data,
     })
@@ -52,7 +52,7 @@ const handler: NextApiHandler = async (req, res) => {
     })
   } else if (req.method === 'GET') {
     const orders: any[] = []
-    const ordersRef = await db.collection('orders').get()
+    const ordersRef = await db.collection('newebpay-integration-orders').get()
     ordersRef.forEach((doc) => {
       orders.push(doc.data())
     })
