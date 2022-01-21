@@ -82,6 +82,7 @@ const handler: NextApiHandler = async (req, res) => {
       return
     } catch (e) {
       res.status(500).end()
+      console.error(e)
       return
     }
   }
