@@ -4,6 +4,8 @@ import { applicationDefault, getApp, initializeApp } from 'firebase-admin/app'
 import { getFirestore } from 'firebase-admin/firestore'
 import { NextApiHandler } from 'next'
 import qs from 'qs'
+import { newebpayEncryptionPair } from '../../../../interal/config'
+import { hashEncryptedTradeInfoBySHA256 } from '../../../../interal/helpers'
 import { OrderStatus } from '../../../../models/Order'
 
 try {
@@ -14,10 +16,6 @@ try {
   })
 }
 const db = getFirestore()
-const newebpayEncryptionPair = {
-  key: process.env.HASH_KEY as string,
-  iv: process.env.HASH_IV as string,
-}
 
 const encryptTradeInfoByAES = (tradeInfoRaw: string) => {
   const { key, iv } = newebpayEncryptionPair
@@ -25,20 +23,11 @@ const encryptTradeInfoByAES = (tradeInfoRaw: string) => {
   const encrypted = cipher.update(tradeInfoRaw, 'utf8', 'hex')
   return encrypted + cipher.final('hex')
 }
-const hashEncryptedTradeInfoBySHA256 = (value: string) => {
-  const { key, iv } = newebpayEncryptionPair
-  const input = `HashKey=${key}&${value}&HashIV=${iv}`
-  return crypto
-    .createHash('sha256')
-    .update(input, 'utf8')
-    .digest('hex')
-    .toUpperCase()
-}
 
 const handler: NextApiHandler = async (req, res) => {
   if (req.method === 'POST') {
     const data = req.body
-    const doc = await db.collection('orders').add({
+    const doc = await db.collection('newebpay-integration/orders').add({
       status: OrderStatus.Pending,
       customizedData: data,
     })
@@ -69,7 +58,7 @@ const handler: NextApiHandler = async (req, res) => {
     })
     res.status(200).json(orders)
   }
-  res.status(400)
+  res.status(400).end()
 }
 
 export default handler
