@@ -4,13 +4,13 @@ import { getFirestore } from 'firebase-admin/firestore'
 import { NextApiHandler } from 'next'
 import qs from 'qs'
 import {
-  encryptTradeInfoByAES,
-  extractTradeInfoResponse,
+  encryptByAES,
+  extractResultAndVerifyCheckCode,
   getCheckValue,
   hashEncryptedTradeInfoBySHA256,
   initializeDefaultApp,
-} from '../../../../interal/helpers'
-import { OrderStatus } from '../../../../models/Order'
+} from '../../../../../interal/helpers'
+import { OrderStatus } from '../../../../../models/Order'
 
 initializeDefaultApp()
 const db = getFirestore()
@@ -33,7 +33,7 @@ const handler: NextApiHandler = async (req, res) => {
       NotifyURL: process.env.NOTIFY_URL,
       LoginType: 0,
     })
-    const encryptedTradeInfo = encryptTradeInfoByAES(tradeInfoRaw)
+    const encryptedTradeInfo = encryptByAES(tradeInfoRaw)
     res.status(200).json({
       tradeInfoRaw,
       MerchantID: merchantId,
@@ -79,7 +79,7 @@ const handler: NextApiHandler = async (req, res) => {
             ),
           })
         )
-        responsePayload.detail = extractTradeInfoResponse(data)
+        responsePayload.detail = extractResultAndVerifyCheckCode(data)
       }
       res.status(200).json(responsePayload)
       return

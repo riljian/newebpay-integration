@@ -3,7 +3,7 @@ import { getFirestore } from 'firebase-admin/firestore'
 import { NextApiHandler } from 'next'
 import qs from 'qs'
 import {
-  encryptTradeInfoByAES,
+  encryptByAES,
   hashEncryptedTradeInfoBySHA256,
   initializeDefaultApp,
 } from '../../../../interal/helpers'
@@ -29,7 +29,7 @@ const handler: NextApiHandler = async (req, res) => {
       NotifyURL: process.env.NOTIFY_URL,
       LoginType: 0,
     })
-    const encryptedTradeInfo = encryptTradeInfoByAES(tradeInfoRaw)
+    const encryptedTradeInfo = encryptByAES(tradeInfoRaw)
     res.status(200).json({
       tradeInfoRaw,
       MerchantID: process.env.MERCHANT_ID,
