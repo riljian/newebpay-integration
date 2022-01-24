@@ -39,7 +39,11 @@ const handler: NextApiHandler = async (req, res) => {
       })
     )
     try {
-      extractResultAndVerifyCheckCode(data)
+      const { Status, Message } = data
+      const Result = extractResultAndVerifyCheckCode(data)
+      await db
+        .collection('newebpay-integration-records')
+        .add({ Status, Message, Result })
       await doc.update({ status: OrderStatus.CancelledAuthorization })
       res.status(201).end()
       return
