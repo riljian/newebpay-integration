@@ -50,10 +50,10 @@ const handler: NextApiHandler = async (req, res) => {
       await db.doc(`newebpay-integration-orders/${MerchantOrderNo}`).update({
         status: OrderStatus.FailedAuthorization,
       })
+      console.error('Failed authorization', Status)
     }
 
-    res.status(200).end()
-    console.error('Failed authorization', Status)
+    res.status(201).end()
     return
   }
   res.status(405).end()

@@ -2,6 +2,7 @@ export enum OrderStatus {
   Pending,
   Authorized,
   FailedAuthorization,
+  CancelledAuthorization,
 }
 export enum OrderPaymentType {
   Credit = 'CREDIT',

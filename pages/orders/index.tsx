@@ -10,7 +10,7 @@ import {
 } from '@mui/material'
 import axios from 'axios'
 import { GetServerSideProps, NextPage } from 'next'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import Link from '../../components/Link'
 import Loading from '../../components/Loading'
 import { ORDERS_MANAGE_PATH } from '../../configs/path'
@@ -41,6 +41,8 @@ const columns: Column<Order>[] = [
           return '未請款'
         case OrderStatus.FailedAuthorization:
           return '授權失敗'
+        case OrderStatus.CancelledAuthorization:
+          return '取消授權'
       }
       return '例外狀態'
     },
@@ -64,10 +66,10 @@ const columns: Column<Order>[] = [
     label: '動作',
     key: 'status',
     formatter: (value: OrderStatus, context, others) => {
-      const { mpgGateway } = others
-      if (value === OrderStatus.Pending) {
-        return (
-          <Stack>
+      const { mpgGateway, reloadOrders } = others
+      return (
+        <Stack>
+          {value === OrderStatus.Pending && (
             <Button
               variant="contained"
               onClick={() => {
@@ -84,10 +86,26 @@ const columns: Column<Order>[] = [
             >
               重新支付流程
             </Button>
-          </Stack>
-        )
-      }
-      return null
+          )}
+          {value === OrderStatus.Authorized &&
+            context.paymentType === 'CREDIT' && (
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={() => {
+                  axios
+                    .post(`/api/v1/orders/${context.id}/unauthorize`)
+                    .then(reloadOrders)
+                    .catch((error) => {
+                      console.error(error)
+                    })
+                }}
+              >
+                取消授權
+              </Button>
+            )}
+        </Stack>
+      )
     },
   },
 ]
@@ -96,9 +114,7 @@ const Orders: NextPage<{ mpgGateway: string }> = ({ mpgGateway }) => {
   const [{ orders }, setState] = useState<{ orders: Order[] }>(() => ({
     orders: [],
   }))
-  const pack = { mpgGateway }
-
-  useEffect(() => {
+  const reloadOrders = useCallback(() => {
     axios
       .get('/api/v1/orders')
       .then(({ data }) => {
@@ -108,6 +124,11 @@ const Orders: NextPage<{ mpgGateway: string }> = ({ mpgGateway }) => {
         console.error(error)
       })
   }, [])
+  const pack = { mpgGateway, reloadOrders }
+
+  useEffect(() => {
+    reloadOrders()
+  }, [reloadOrders])
 
   if (orders.length === 0) {
     return <Loading />
