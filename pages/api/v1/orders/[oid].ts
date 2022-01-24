@@ -89,7 +89,7 @@ const handler: NextApiHandler = async (req, res) => {
       return
     }
   }
-  res.status(400).end()
+  res.status(405).end()
 }
 
 export default handler

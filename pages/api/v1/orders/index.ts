@@ -49,7 +49,7 @@ const handler: NextApiHandler = async (req, res) => {
     })
     res.status(200).json(orders)
   }
-  res.status(400).end()
+  res.status(405).end()
 }
 
 export default handler

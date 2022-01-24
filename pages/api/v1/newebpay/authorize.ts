@@ -11,46 +11,52 @@ initializeDefaultApp()
 const db = getFirestore()
 
 const handler: NextApiHandler = async (req, res) => {
-  const { TradeInfo, TradeSha } = req.body
+  const { method, body } = req
 
-  if (hashEncryptedTradeInfoBySHA256(TradeInfo) !== TradeSha) {
-    res.status(400).json({
-      message: 'Invalid TradeSha',
-    })
-    console.error('Invalid TradeSha', TradeInfo, TradeSha)
+  if (method === 'POST') {
+    const { TradeInfo, TradeSha } = body
+
+    if (hashEncryptedTradeInfoBySHA256(TradeInfo) !== TradeSha) {
+      res.status(400).json({
+        message: 'Invalid TradeSha',
+      })
+      console.error('Invalid TradeSha', TradeInfo, TradeSha)
+      return
+    }
+
+    let tradeInfo = null
+    try {
+      tradeInfo = decryptTradeInfo(TradeInfo)
+    } catch (e) {
+      res.status(400).json({
+        message: 'Invalid TradeInfo',
+      })
+      console.error('Invalid TradeInfo', TradeInfo)
+      return
+    }
+
+    await db.collection('newebpay-integration-records').add(tradeInfo)
+    const {
+      Status,
+      Result: { MerchantOrderNo, PaymentType },
+    } = tradeInfo
+
+    if (Status === 'SUCCESS') {
+      await db.doc(`newebpay-integration-orders/${MerchantOrderNo}`).update({
+        status: OrderStatus.Authorized,
+        paymentType: PaymentType,
+      })
+    } else {
+      await db.doc(`newebpay-integration-orders/${MerchantOrderNo}`).update({
+        status: OrderStatus.FailedAuthorization,
+      })
+    }
+
+    res.status(200).end()
+    console.error('Failed authorization', Status)
     return
   }
-
-  let tradeInfo = null
-  try {
-    tradeInfo = decryptTradeInfo(TradeInfo)
-  } catch (e) {
-    res.status(400).json({
-      message: 'Invalid TradeInfo',
-    })
-    console.error('Invalid TradeInfo', TradeInfo)
-    return
-  }
-
-  await db.collection('newebpay-integration-records').add(tradeInfo)
-  const {
-    Status,
-    Result: { MerchantOrderNo, PaymentType },
-  } = tradeInfo
-
-  if (Status === 'SUCCESS') {
-    await db.doc(`newebpay-integration-orders/${MerchantOrderNo}`).update({
-      status: OrderStatus.Authorized,
-      paymentType: PaymentType,
-    })
-  } else {
-    await db.doc(`newebpay-integration-orders/${MerchantOrderNo}`).update({
-      status: OrderStatus.FailedAuthorization,
-    })
-  }
-
-  res.status(200).end()
-  console.error('Failed authorization', Status)
+  res.status(405).end()
 }
 
 export default handler
