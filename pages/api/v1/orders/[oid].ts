@@ -10,6 +10,7 @@ import {
   getCheckValue,
   hashEncryptedTradeInfoBySHA256,
 } from '../../../../interal/helpers'
+import { OrderStatus } from '../../../../models/Order'
 
 try {
   getApp()
@@ -53,18 +54,6 @@ const handler: NextApiHandler = async (req, res) => {
       const { customizedData: createData, status } = (
         await db.doc(`newebpay-integration-orders/${oid}`).get()
       ).data()!
-      const { data } = await axios.post(
-        process.env.TRADE_INFO_ENDPOINT!,
-        qs.stringify({
-          MerchantID: merchantId,
-          Version: '1.3',
-          RespondType: 'JSON',
-          TimeStamp: String(getUnixTime(new Date())),
-          MerchantOrderNo: oid,
-          Amt: createData.Amt,
-          CheckValue: getCheckValue(createData.Amt, merchantId, oid as string),
-        })
-      )
       const records: any[] = []
       const recordDocs = await db
         .collection('newebpay-integration-records')
@@ -73,12 +62,32 @@ const handler: NextApiHandler = async (req, res) => {
       recordDocs.forEach((doc) => {
         records.push(doc.data())
       })
-      res.status(200).json({
+      const responsePayload = {
         status,
         createData,
         records,
-        detail: extractTradeInfoResponse(data),
-      })
+        detail: null,
+      }
+      if (status !== OrderStatus.FailedAuthorization) {
+        const { data } = await axios.post(
+          process.env.TRADE_INFO_ENDPOINT!,
+          qs.stringify({
+            MerchantID: merchantId,
+            Version: '1.3',
+            RespondType: 'JSON',
+            TimeStamp: String(getUnixTime(new Date())),
+            MerchantOrderNo: oid,
+            Amt: createData.Amt,
+            CheckValue: getCheckValue(
+              createData.Amt,
+              merchantId,
+              oid as string
+            ),
+          })
+        )
+        responsePayload.detail = extractTradeInfoResponse(data)
+      }
+      res.status(200).json(responsePayload)
       return
     } catch (e) {
       res.status(500).end()
