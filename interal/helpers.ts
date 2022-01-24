@@ -1,4 +1,5 @@
 import crypto from 'crypto'
+import { applicationDefault, getApp, initializeApp } from 'firebase-admin/app'
 import { GetServerSidePropsContext } from 'next'
 import { newebpayEncryptionPair } from './config'
 
@@ -90,4 +91,13 @@ export const extractStatusAndTradeInfo = async (
   const { Status, TradeInfo } = qs.parse(data as string)
 
   return { status: Status, tradeInfo: decryptTradeInfo(TradeInfo) }
+}
+export const initializeDefaultApp = () => {
+  try {
+    getApp()
+  } catch (e) {
+    initializeApp({
+      credential: applicationDefault(),
+    })
+  }
 }

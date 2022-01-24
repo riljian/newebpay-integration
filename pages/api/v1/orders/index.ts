@@ -1,21 +1,15 @@
 import { getUnixTime } from 'date-fns'
-import { applicationDefault, getApp, initializeApp } from 'firebase-admin/app'
 import { getFirestore } from 'firebase-admin/firestore'
 import { NextApiHandler } from 'next'
 import qs from 'qs'
 import {
   encryptTradeInfoByAES,
   hashEncryptedTradeInfoBySHA256,
+  initializeDefaultApp,
 } from '../../../../interal/helpers'
 import { OrderStatus } from '../../../../models/Order'
 
-try {
-  getApp()
-} catch (e) {
-  initializeApp({
-    credential: applicationDefault(),
-  })
-}
+initializeDefaultApp()
 const db = getFirestore()
 
 const handler: NextApiHandler = async (req, res) => {
