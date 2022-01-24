@@ -49,6 +49,7 @@ export const getCheckValue = (
 export const extractResultAndVerifyCheckCode = (data: any): any => {
   const { Status, Result } = data
 
+  // TODO: this should not be here
   if (Status !== 'SUCCESS') {
     throw new Error(Status)
   }

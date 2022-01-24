@@ -11,6 +11,7 @@ import {
 import axios from 'axios'
 import { GetServerSideProps, NextPage } from 'next'
 import { useCallback, useEffect, useState } from 'react'
+import CloseOrder from '../../components/CloseOrder'
 import Link from '../../components/Link'
 import Loading from '../../components/Loading'
 import { ORDERS_MANAGE_PATH } from '../../configs/path'
@@ -38,7 +39,7 @@ const columns: Column<Order>[] = [
         case OrderStatus.Pending:
           return '未授權'
         case OrderStatus.Authorized:
-          return '未請款'
+          return '已付款'
         case OrderStatus.FailedAuthorization:
           return '授權失敗'
         case OrderStatus.CancelledAuthorization:
@@ -89,20 +90,23 @@ const columns: Column<Order>[] = [
           )}
           {value === OrderStatus.Authorized &&
             context.paymentType === 'CREDIT' && (
-              <Button
-                variant="contained"
-                color="secondary"
-                onClick={() => {
-                  axios
-                    .post(`/api/v1/orders/${context.id}/unauthorize`)
-                    .then(reloadOrders)
-                    .catch((error) => {
-                      console.error(error)
-                    })
-                }}
-              >
-                取消授權
-              </Button>
+              <>
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  onClick={() => {
+                    axios
+                      .post(`/api/v1/orders/${context.id}/unauthorize`)
+                      .then(reloadOrders)
+                      .catch((error) => {
+                        console.error(error)
+                      })
+                  }}
+                >
+                  取消授權
+                </Button>
+                <CloseOrder orderId={context.id} onSuccess={reloadOrders} />
+              </>
             )}
         </Stack>
       )
