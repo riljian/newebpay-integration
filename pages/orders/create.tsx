@@ -174,8 +174,8 @@ const fieldConfigs = new Map<FieldName, FieldConfig>([
     },
   ],
 ])
-const transformValuesToPayload = (values: Values) =>
-  Object.entries(values).reduce((acc, [name, value]) => {
+const transformValuesToPayload = (values: Values) => {
+  const payload = Object.entries(values).reduce((acc, [name, value]) => {
     const { mappedKey, formatter } = fieldConfigs.get(name as FieldName)!
     const formattedValue = formatter ? formatter(value) : value
     if (!formattedValue) {
@@ -183,6 +183,8 @@ const transformValuesToPayload = (values: Values) =>
     }
     return { ...acc, [mappedKey || name]: formattedValue }
   }, {})
+  return Object.assign(payload, { Version: '2.0' })
+}
 
 const CreateOrder: NextPage<{ mpgGateway: string }> = ({ mpgGateway }) => {
   const [{ newebpayForm }, setState] = useState<State>(() => ({

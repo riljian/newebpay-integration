@@ -38,18 +38,34 @@ const handler: NextApiHandler = async (req, res) => {
     await db.collection('newebpay-integration-records').add(tradeInfo)
     const {
       Status,
-      Result: { MerchantOrderNo, PaymentType },
+      Result: {
+        MerchantOrderNo,
+        PaymentType,
+        Card6No,
+        Card4No,
+        Exp,
+        TokenValue,
+      },
     } = tradeInfo
 
+    const doc = db.doc(`newebpay-integration-orders/${MerchantOrderNo}`)
     if (Status === 'SUCCESS') {
-      await db.doc(`newebpay-integration-orders/${MerchantOrderNo}`).update({
+      await doc.update({
         status: OrderStatus.Authorized,
         paymentType: PaymentType,
       })
+      if (TokenValue) {
+        const {
+          customizedData: { TokenTerm },
+        } = (await doc.get()).data() as any
+        await db.doc(`newebpay-integration-users/${TokenTerm}`).set({
+          token: TokenValue,
+          cardNo: `${Card6No}******${Card4No}`,
+          exp: Exp,
+        })
+      }
     } else {
-      await db.doc(`newebpay-integration-orders/${MerchantOrderNo}`).update({
-        status: OrderStatus.FailedAuthorization,
-      })
+      await doc.update({ status: OrderStatus.FailedAuthorization })
       console.error('Failed authorization', Status)
     }
 

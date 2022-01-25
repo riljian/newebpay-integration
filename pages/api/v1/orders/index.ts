@@ -19,24 +19,23 @@ const handler: NextApiHandler = async (req, res) => {
       status: OrderStatus.Pending,
       customizedData: data,
     })
+    const { Version } = data
     const tradeInfoRaw = qs.stringify({
-      ...data,
       MerchantID: process.env.MERCHANT_ID,
       RespondType: 'JSON',
       TimeStamp: String(getUnixTime(new Date())),
-      Version: '2.0',
       MerchantOrderNo: doc.id,
       NotifyURL: process.env.NOTIFY_URL,
       LoginType: 0,
+      ...data,
     })
     const encryptedTradeInfo = encryptByAES(tradeInfoRaw)
     res.status(200).json({
       tradeInfoRaw,
+      Version,
       MerchantID: process.env.MERCHANT_ID,
       TradeInfo: encryptedTradeInfo,
       TradeSha: hashEncryptedTradeInfoBySHA256(encryptedTradeInfo),
-      Version: '2.0',
-      EncryptType: 0,
     })
   } else if (req.method === 'GET') {
     const orders: any[] = []
