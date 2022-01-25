@@ -53,7 +53,7 @@ const handler: NextApiHandler = async (req, res) => {
       console.error('Failed authorization', Status)
     }
 
-    res.status(201).end()
+    res.status(200).end()
     return
   }
   res.status(405).end()
