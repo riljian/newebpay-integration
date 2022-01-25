@@ -38,7 +38,7 @@ export const decryptByAES = (input: string) => {
   decrypted += decipher.final('utf8')
   const lastCharCode = decrypted.charCodeAt(decrypted.length - 1)
   const padding = lastCharCode > 31 ? 0 : lastCharCode
-  console.log('padding', padding)
+  console.log(`input: ${input} with ${padding} padding(s)`)
   return decrypted.slice(0, decrypted.length - padding)
 }
 export const hashEncryptedTradeInfoBySHA256 = (value: string) => {
