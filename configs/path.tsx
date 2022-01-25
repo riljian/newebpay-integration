@@ -1,3 +1,4 @@
+export const AGREEMENT_PATH = '/agreement'
 export const ORDERS_MANAGE_PATH = '/orders'
 export const ORDERS_CREATE_PATH = '/orders/create'
 export const ORDERS_RESULT_PATH = '/orders/result'

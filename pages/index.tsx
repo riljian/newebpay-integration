@@ -1,7 +1,11 @@
 import { Button, Container, Stack } from '@mui/material'
 import type { GetStaticProps, NextPage } from 'next'
 import Link from '../components/Link'
-import { ORDERS_CREATE_PATH, ORDERS_MANAGE_PATH } from '../configs/path'
+import {
+  AGREEMENT_PATH,
+  ORDERS_CREATE_PATH,
+  ORDERS_MANAGE_PATH,
+} from '../configs/path'
 
 const Home: NextPage = () => (
   <Container
@@ -18,6 +22,9 @@ const Home: NextPage = () => (
       </Button>
       <Button component={Link} href={ORDERS_MANAGE_PATH} variant="contained">
         管理訂單
+      </Button>
+      <Button component={Link} href={AGREEMENT_PATH} variant="contained">
+        約定信用卡
       </Button>
     </Stack>
   </Container>
