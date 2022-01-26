@@ -13,8 +13,7 @@ enum PayType {
 
 const CreateOrder: NextPage<{ mpgGateway: string }> = ({ mpgGateway }) => {
   const [{ activeTab }, setState] = useState(() => ({
-    // FIXME
-    activeTab: PayType.Agreement,
+    activeTab: PayType.Normal,
   }))
   return (
     <Container sx={{ py: 2 }}>
