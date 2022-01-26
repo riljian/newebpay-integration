@@ -11,6 +11,10 @@ enum PayType {
   Agreement,
 }
 
+const tabs = [
+  { label: '一般支付', value: PayType.Normal },
+  { label: '約定支付', value: PayType.Agreement },
+]
 const CreateOrder: NextPage<{ mpgGateway: string }> = ({ mpgGateway }) => {
   const [{ activeTab }, setState] = useState(() => ({
     activeTab: PayType.Normal,
@@ -24,8 +28,9 @@ const CreateOrder: NextPage<{ mpgGateway: string }> = ({ mpgGateway }) => {
             setState((s) => ({ ...s, activeTab: newValue }))
           }}
         >
-          <Tab label="一般支付" value={PayType.Normal} />
-          <Tab label="約定支付" value={PayType.Agreement} />
+          {tabs.map(({ label, value }) => (
+            <Tab label={label} value={value} key={label} />
+          ))}
         </Tabs>
         <Box sx={{ mt: 4 }}>
           {activeTab === PayType.Normal && (
