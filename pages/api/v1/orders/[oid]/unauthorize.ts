@@ -13,38 +13,42 @@ import { OrderStatus } from '../../../../../models/Order'
 initializeDefaultApp()
 const db = getFirestore()
 
-const handler: NextApiHandler = async (req, res) => {
+export const unAuthorizeOrder = async (oid: string) => {
   const merchantId = process.env.MERCHANT_ID as string
+  const doc = db.doc(`newebpay-integration-orders/${oid}`)
+  const { customizedData: createData } = (await doc.get()).data()!
+  const { data } = await axios.post(
+    process.env.CANCEL_AUTHORIZATION_ENDPOINT!,
+    qs.stringify({
+      MerchantID_: merchantId,
+      PostData_: encryptByAES(
+        qs.stringify({
+          RespondType: 'JSON',
+          Version: '1.0',
+          Amt: createData.Amt,
+          MerchantOrderNo: oid,
+          IndexType: 1,
+          TimeStamp: String(getUnixTime(new Date())),
+        })
+      ),
+    })
+  )
+  const { Status, Message } = data
+  const Result = extractResultAndVerifyCheckCode(data)
+  await db
+    .collection('newebpay-integration-records')
+    .add({ Status, Message, Result })
+  await doc.update({ status: OrderStatus.CancelledAuthorization })
+}
+
+const handler: NextApiHandler = async (req, res) => {
   const {
     method,
     query: { oid },
   } = req
   if (method === 'POST') {
-    const doc = db.doc(`newebpay-integration-orders/${oid}`)
-    const { customizedData: createData } = (await doc.get()).data()!
-    const { data } = await axios.post(
-      process.env.CANCEL_AUTHORIZATION_ENDPOINT!,
-      qs.stringify({
-        MerchantID_: merchantId,
-        PostData_: encryptByAES(
-          qs.stringify({
-            RespondType: 'JSON',
-            Version: '1.0',
-            Amt: createData.Amt,
-            MerchantOrderNo: oid,
-            IndexType: 1,
-            TimeStamp: String(getUnixTime(new Date())),
-          })
-        ),
-      })
-    )
     try {
-      const { Status, Message } = data
-      const Result = extractResultAndVerifyCheckCode(data)
-      await db
-        .collection('newebpay-integration-records')
-        .add({ Status, Message, Result })
-      await doc.update({ status: OrderStatus.CancelledAuthorization })
+      await unAuthorizeOrder(oid as string)
       res.status(201).end()
       return
     } catch (e) {

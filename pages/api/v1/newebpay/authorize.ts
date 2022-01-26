@@ -6,6 +6,7 @@ import {
   initializeDefaultApp,
 } from '../../../../interal/helpers'
 import { OrderStatus } from '../../../../models/Order'
+import { unAuthorizeOrder } from '../orders/[oid]/unauthorize'
 
 initializeDefaultApp()
 const db = getFirestore()
@@ -63,6 +64,7 @@ const handler: NextApiHandler = async (req, res) => {
           cardNo: `${Card6No}******${Card4No}`,
           exp: Exp,
         })
+        await unAuthorizeOrder(MerchantOrderNo)
       }
     } else {
       await doc.update({ status: OrderStatus.FailedAuthorization })
