@@ -1,6 +1,6 @@
 import { Button, Container, Stack, TextField, Typography } from '@mui/material'
 import axios from 'axios'
-import type { GetStaticProps, NextPage } from 'next'
+import type { GetServerSideProps, NextPage } from 'next'
 import { FormEvent, useRef, useState } from 'react'
 import { SupportedLanguage } from '../configs/newebpay'
 import { ORDERS_RESULT_PATH } from '../configs/path'
@@ -58,7 +58,7 @@ const Agreement: NextPage<{ mpgGateway: string }> = ({ mpgGateway }) => {
   )
 }
 
-export const getStaticProps: GetStaticProps = async () => ({
+export const getServerSideProps: GetServerSideProps = async () => ({
   props: {
     title: '約定信用卡',
     mpgGateway: process.env.MPG_GATEWAY,
