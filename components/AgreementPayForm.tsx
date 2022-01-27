@@ -3,6 +3,7 @@ import axios from 'axios'
 import { Field, Form, Formik } from 'formik'
 import { useMemo, useState } from 'react'
 import * as yup from 'yup'
+import { formatValues } from '../helpers'
 import FormikTextField from './formik/TextField'
 
 type FieldName = 'amount' | 'description' | 'email'
@@ -45,14 +46,7 @@ const fieldConfigs = new Map<FieldName, FieldConfig>([
   ],
 ])
 const transformValuesToPayload = (values: Values) =>
-  Object.entries(values).reduce((acc, [name, value]) => {
-    const { mappedKey, formatter } = fieldConfigs.get(name as FieldName)!
-    const formattedValue = formatter ? formatter(value) : value
-    if (!formattedValue) {
-      return acc
-    }
-    return { ...acc, [mappedKey || name]: formattedValue }
-  }, {})
+  formatValues<Values, FieldName>(values, fieldConfigs)
 
 const AgreementPayForm = () => {
   const [state, setState] = useState<State>(() => ({

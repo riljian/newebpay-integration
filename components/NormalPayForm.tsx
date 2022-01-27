@@ -4,9 +4,10 @@ import { addDays, format } from 'date-fns'
 import { Field, Form, Formik } from 'formik'
 import { FC, useMemo, useState } from 'react'
 import * as yup from 'yup'
+import { FieldConfig } from '../configs'
 import { languageOptions, SupportedLanguage } from '../configs/newebpay'
 import { ORDERS_RESULT_PATH, ORDERS_TICKET_PATH } from '../configs/path'
-import { formPost } from '../helpers'
+import { formatValues, formPost } from '../helpers'
 import FormikCheckboxField from './formik/Checkbox'
 import FormikDatePickerField from './formik/DatePicker'
 import FormikSelectField from './formik/Select'
@@ -28,12 +29,6 @@ type FieldName =
   | 'enableWebATM'
   | 'enableVacc'
 type Values = { [key in FieldName]: any }
-interface FieldConfig {
-  default: any
-  mappedKey?: string
-  formatter?: (value: any) => any
-  schema?: yup.BaseSchema
-}
 interface State {
   newebpayForm: any
 }
@@ -158,14 +153,7 @@ const fieldConfigs = new Map<FieldName, FieldConfig>([
   ],
 ])
 const transformValuesToPayload = (values: Values) => {
-  const payload = Object.entries(values).reduce((acc, [name, value]) => {
-    const { mappedKey, formatter } = fieldConfigs.get(name as FieldName)!
-    const formattedValue = formatter ? formatter(value) : value
-    if (!formattedValue) {
-      return acc
-    }
-    return { ...acc, [mappedKey || name]: formattedValue }
-  }, {})
+  const payload = formatValues<Values, FieldName>(values, fieldConfigs)
   return Object.assign(payload, { Version: '2.0' })
 }
 
