@@ -20,7 +20,7 @@ import Order, { OrderPaymentType, OrderStatus } from '../../models/Order'
 
 interface Column<T> {
   label: string
-  key: keyof T
+  key?: keyof T
   formatter?: (value: any, context: T, others: any) => any
 }
 const columns: Column<Order>[] = [
@@ -62,6 +62,10 @@ const columns: Column<Order>[] = [
       }
       return '例外支付方式'
     },
+  },
+  {
+    label: '金額',
+    formatter: (value: Order) => value.customizedData.Amt,
   },
   {
     label: '動作',
@@ -153,7 +157,9 @@ const Orders: NextPage<{ mpgGateway: string }> = ({ mpgGateway }) => {
             <TableRow key={order.id}>
               {columns.map(({ key, label, formatter }) => (
                 <TableCell key={label}>
-                  {formatter ? formatter(order[key], order, pack) : order[key]}
+                  {formatter
+                    ? formatter(key ? order[key] : order, order, pack)
+                    : order[key!]}
                 </TableCell>
               ))}
             </TableRow>

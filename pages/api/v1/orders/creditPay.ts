@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { getUnixTime } from 'date-fns'
+import admin from 'firebase-admin'
 import { getFirestore } from 'firebase-admin/firestore'
 import { NextApiHandler } from 'next'
 import qs from 'qs'
@@ -39,6 +40,7 @@ const handler: NextApiHandler = async (req, res) => {
     const orderDoc = await db.collection('newebpay-integration-orders').add({
       status: OrderStatus.Pending,
       customizedData: data,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
     })
     const { PayerEmail } = data
     const userDoc = await db

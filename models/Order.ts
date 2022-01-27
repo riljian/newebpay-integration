@@ -17,4 +17,5 @@ export default class Order {
   id!: string
   status: OrderStatus = OrderStatus.Pending
   paymentType?: OrderPaymentType
+  customizedData!: any
 }

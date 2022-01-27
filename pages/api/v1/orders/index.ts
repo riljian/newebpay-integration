@@ -1,4 +1,5 @@
 import { getUnixTime } from 'date-fns'
+import admin from 'firebase-admin'
 import { getFirestore } from 'firebase-admin/firestore'
 import { NextApiHandler } from 'next'
 import qs from 'qs'
@@ -18,6 +19,7 @@ const handler: NextApiHandler = async (req, res) => {
     const doc = await db.collection('newebpay-integration-orders').add({
       status: OrderStatus.Pending,
       customizedData: data,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
     })
     const { Version } = data
     const tradeInfoRaw = qs.stringify({
@@ -39,7 +41,11 @@ const handler: NextApiHandler = async (req, res) => {
     })
   } else if (req.method === 'GET') {
     const orders: any[] = []
-    const ordersRef = await db.collection('newebpay-integration-orders').get()
+    const ordersRef = await db
+      .collection('newebpay-integration-orders')
+      .where('createdAt', '!=', null)
+      .orderBy('createdAt', 'desc')
+      .get()
     ordersRef.forEach((doc) => {
       orders.push({
         id: doc.id,
